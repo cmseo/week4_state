@@ -21,20 +21,55 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import com.codelabs.state.ui.StateCodelabTheme
 
 class TodoActivity : AppCompatActivity() {
 
-    val todoViewModel by viewModels<TodoViewModel>()
+    private val todoViewModel by viewModels<TodoViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             StateCodelabTheme {
                 Surface {
-                    // TODO: build the screen in compose
+                    TodoActivityScreen(
+                        todoViewModel = todoViewModel
+                    )
                 }
             }
         }
     }
 }
+
+@Composable
+private fun TodoActivityScreen(todoViewModel: TodoViewModel) {
+    // 2. Pass the state down
+//    val items = listOf<TodoItem>()
+    val items: List<TodoItem> by todoViewModel.todoItems.observeAsState(listOf())
+    // 1. Flow the events up
+    TodoScreen(
+        items = items,
+        onAddItem =
+        // todoViewModel::addItem
+        //  method reference syntax
+        //      https://tourspace.tistory.com/110
+        //      https://medium.com/harrythegreat/%EC%BD%94%ED%8B%80%EB%A6%B0%EC%9D%98-%EB%8D%94%EB%B8%94%EC%BD%9C%EB%A1%A0-%EC%B0%B8%EC%A1%B0-73ff25484586
+        {
+                    todoViewModel.addItem(
+                        item = it
+                    )
+        },
+        onRemoveItem = {
+            todoViewModel.removeItem(
+                item = it
+            )
+        })
+}
+/*
+* In this section we explored how to build a unidirectional data flow design in Compose using ViewModels.
+* We also saw how to use a stateless composable to display a stateful UI by using a technique called state hoisting. And, we continued to explore how to think about dynamic UIs in terms of state and events.
+* In the next section we'll explore adding memory to composable functions.
+* */
